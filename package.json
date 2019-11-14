@@ -1,0 +1,27 @@
+{
+    "name": "c2s",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack -w"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lisjak/c2s-dev-exercise.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/lisjak/c2s-dev-exercise/issues"
+    },
+    "homepage": "https://github.com/lisjak/c2s-dev-exercise#readme",
+    "devDependencies": {
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10"
+    },
+    "dependencies": {
+        "leaflet": "^1.5.1"
+    }
+}

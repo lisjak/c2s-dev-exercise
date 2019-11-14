@@ -1,0 +1,329 @@
+html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    color: white;
+    background-color: black;
+    display: flex;
+        flex-direction: row;
+    flex-wrap: wrap;
+    align-items: column;
+}
+
+#map {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    border: 10px solid gold;
+}
+
+
+.header {
+    background-color: black;
+    color: white;
+    font-family: 'Playfair Display';
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    min-height: 10%;
+    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    height: 3em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    color: white;
+}
+
+
+.header a {
+    color: white;
+}
+
+.headerlink {
+    font-family: Roboto;
+    position: relative;
+    bottom: 0;
+    padding: 2%;
+    font-size: 3vh;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5em;
+    width: 100%;
+}
+
+.headerlink a {
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.1px;
+    transition: color ease 0.3s;
+    padding: 2%;
+}
+
+.headerlink:nth-child(1) {
+    font-family: Playfair Display;
+    text-transform: none;
+    letter-spacing: -0.04em;
+    margin-right: 15%;
+        font-size: 4vh;
+}
+
+.headerlink a:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 12%;
+    left: 0;
+    bottom: 0;
+    background-color: #d4af37;
+    transition: all ease 0.3s;
+}
+
+.headerlink a:hover {
+    color: white;
+}
+
+.headerlink a:hover::after {
+    height: 100%;
+}
+
+#titlebox {
+    position: absolute;
+    color: black;
+    left: 0;
+    bottom: 10%;
+    padding: 1%;
+    margin: 5%;
+    width: 25%;
+    height: 45%;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid white;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.titleitem:nth-child(1){
+    padding-left: 80%;
+}
+
+#btn, #btn2{
+    border: 1px solid white;
+    background: transparent;
+    color: white;
+    font-size: 10px;
+    padding: 0%;
+    height: 20px;
+    width: 20px;
+    margin: auto;
+    font: 'Roboto';
+    transition: 0.5s;
+}
+
+#btn:hover, #btn2:hover{
+    background: black;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.titleitem h2 {
+    font-family: 'Playfair Display';
+    letter-spacing: -0.04em;
+    font-size: 3vh;
+}
+
+h3 {
+    font-family: 'Roboto'
+    font-size: 2vh;
+    font-weight: bold;
+}
+
+ p{
+    font-family: 'Roboto'
+    font-size: 1.5vh;
+}
+
+
+.axis path, .axis line {
+    fill: none;
+    stroke: white;
+    shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .line {
+        fill: none;
+        stroke: gold;
+        stroke-width: 1.5px;
+    }
+
+    .overlay {
+        fill: none;
+        pointer-events: all;
+    }
+
+    .focus circle {
+        fill: gold;
+    }
+
+.focus text {
+    font-size: 14px;
+    color: white;
+    font-family: Roboto;
+    }
+
+.tooltip {
+    fill: gold;
+    stroke: white;
+    }
+
+.tooltip-date, .tooltip-likes {
+    font-weight: bold;
+    }
+
+
+#graph {
+    background-color: darkgrey;
+    border: 10px solid gold;
+    margin-top: 5%;
+    max-height: 140vh;
+}
+
+#graph svg {
+    padding: 2%;
+    /* width: 100%
+    height: 100%; */
+}
+
+#graphbox {
+    position: absolute;
+    color: black;
+    right: 10%;
+    top: 120vh;
+    padding: 1%;
+    margin: 5%;
+    width: 25%;
+    height: 25%;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid white;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#graphbox h2 {
+    font-family: 'Playfair Display';
+    letter-spacing: -0.04em;
+    font-size: 3vh;
+}
+
+#graphbox p{
+    font-family: 'Roboto'
+    font-size: 1.5vh;
+    text-align: center;
+}
+
+text {
+    font-family: sans-serif;
+    font-size: 12px;
+    fill: white;
+}
+
+#tool_tip {
+    font-family: 'Roboto';
+    position: absolute;
+    width: 200px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -mox-box-shadow: 4px 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rbga(0, 0, 0, 0.4) pointer-events: none;
+}
+
+#tool_tip.hidden {
+    opacity: 0;
+}
+
+#tool_tip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+#piechart {
+    background-color: darkgrey;
+    border: 10px solid gold;
+    margin-top: 5%;
+    padding: 0;
+    width: 100vw;
+    max-height: 100vw;
+    z-index: 10;
+}
+
+#piechart svg{
+    margin-top: 5%;
+    margin-left: 40%;
+}
+
+#piebox {
+    position: absolute;
+    color: black;
+    left: 7%;
+    top: 250vh;
+    padding: 1%;
+    margin: 5%;
+    width: 25%;
+    height: 15%;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid white;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#piebox h2 {
+    font-family: 'Playfair Display';
+    letter-spacing: -0.04em;
+    font-size: 3vh;
+}
+
+#piebox p{
+    font-family: 'Roboto'
+    font-size: 1.5vh;
+    text-align: center;
+}
+
+#flooded{
+color:#d4af37;
+background-color:#d4af37;
+}
+
+#nonflooded{
+color:#696969;
+background-color:#696969;
+}

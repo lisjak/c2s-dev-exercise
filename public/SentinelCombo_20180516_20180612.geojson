@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "SentinelCombo_20180516_20180612",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "SentinelCombo_20180516_20180612", "description": null, "icon": "https:\/\/storage.googleapis.com\/earth-kml.appspot.com\/no_icon.png" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 82.0, 10.0 ], [ 82.0, 5.0 ], [ 79.0, 5.0 ], [ 79.0, 10.0 ], [ 82.0, 10.0 ] ] ] } }
+]
+}

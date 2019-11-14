@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8" />
+    <title>Cloud to Street Developer Exercise</title>
+    <meta
+      name="description"
+      content="This is the page built and designed for Cloud To Street's 2nd round interview! "
+    />
+    <meta name="author" content="http://lisjak.github.com" />
+
+    <!-- Fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Domine|Playfair+Display|Roboto&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./public/custom.css" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"
+    />
+
+    <!-- Scripts
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+    <!-- Leaflet.js -->
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+ 
+    
+
+
+
+
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.23.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.23.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
+
+    <link href="https://api.mapbox.com/mapbox-assembly/v0.10.1/assembly.min.css" rel="stylesheet">
+
+    <!-- Plugins -->
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-hash/v0.2.1/leaflet-hash.js'></script>
+
+
+
+
+    <!-- Leaflet AJAX plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+    <script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
+
+
+
+
+
+
+    <!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.7.2/d3.min.js"></script>
+
+
+
+
+
+
+
+
+  </head>
+
+  <!-- Custom –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+  <!-- HTML elements -->
+  <body>
+    <div class="header">
+    <div class = "headerlink">
+      <a href = "/">C2S Dev Exercise</a>
+    </div>
+    <div class = "headerlink">
+      <a href = "/#map">Flood Map</a>
+    </div>
+    <div class = "headerlink">
+      <a href = "/#graph">Data Viz</a>
+    </div>
+  </div>
+
+    <div id="map"></div>
+
+    <div id="titlebox">
+      <div class="titleitem">
+        <input id='btn' type="submit" value='X'></input>
+      </div>
+      <div class="titleitem">
+        <h2>Flooding in the Kelaniya Area of Sri Lanka, 2018</h2><br>
+      </div>
+      <div class="titleitem">
+        <h3>Key</h3><br>
+      </div>
+      <div class="titleitem">
+        <p><img src="./public/red-line.png" width="16px"> Flood perimiter</p><br>
+      </div>
+      <div class="titleitem">
+        <p><img src="./public/hospital-symbol.png" width="16px"> hospital</p>
+      </div>
+    </div>
+
+<!--Line Graph-->
+<div id="graph"></div>
+
+<div id ="graphbox">
+  <div class="titleitem">
+        <input id='btn2' type="submit" value='X'></input>
+    </div>
+    <h2>Sri Lankan Precipitation, 2018</h2>
+    <p>Use the tooltip on hover to retrieve plotted data!</p>
+</div>
+  
+<!--Pie Chart-->
+<div id="piechart">
+  <div id="tool_tip" class="hidden">
+    <p><strong>Impact</strong>
+    </p>
+    <p><span id="value"></span>km^2</p>
+    <p><span id="flooded">|||||||||||||||</span> Flooded</p>
+    <p><span id="nonflooded">|||||||||||||||</span> Non-Flooded</p>
+  </div>
+</div>
+
+<div id = "piebox">
+  <h2>Sri Lanka Flood Impact</h2>
+  <p>Hover to interact with the pie chart!</p>
+</div>
+
+<!-- JS -->
+<script>
+//Remove titlebox on click 
+var btn = document.getElementById('btn');
+btn.onclick = function () {
+    document.getElementById('titlebox').remove();
+    this.remove();
+};
+
+//Remove graphbox on click 
+var btn2 = document.getElementById('btn2');
+btn.onclick = function () {
+    document.getElementById('graphbox').remove();
+    this.remove();
+};
+
+
+//Precipitation D3 Line graph
+var margin = { top: 30, right: 120, bottom: 30, left: 50 },
+  width = 1000 - margin.left - margin.right,
+  height = 800 - margin.top - margin.bottom,
+  tooltip = { width: 100, height: 100, x: 10, y: -30 };
+
+var parseDate = d3.time.format("%m/%e/%Y").parse,
+  bisectDate = d3.bisector(function(d) { return d.date; }).left,
+  formatValue = d3.format(","),
+  dateFormatter = d3.time.format("%m/%d/%y");
+
+var x = d3.time.scale()
+  .range([0, width]);
+
+  var y = d3.scale.linear()
+            .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom")
+  .tickFormat(dateFormatter);
+
+var yAxis = d3.svg.axis()
+  .scale(y)
+  .orient("left")
+  .tickFormat(d3.format("s"))
+
+var line = d3.svg.line()
+  .x(function(d) { return x(d.date); })
+  .y(function(d) { return y(d.precip); });
+
+var svg = d3.select("#graph").append("svg")
+    .attr("viewBox", `0 0 1000 1000`);
+        
+
+d3.csv("./public/Sri-Lanka_GSMaP_20180516_20180612.csv", function(error, data) {
+  if (error) throw error;
+
+  data.forEach(function(d) {
+    d.date = parseDate(d.date);
+    d.precip = +d.precip;
+  });
+
+  data.sort(function(a, b) {
+    return a.date - b.date;
+  });
+
+  x.domain([data[0].date, data[data.length - 1].date]);
+  y.domain(d3.extent(data, function(d) { return d.precip; }));
+
+  svg.append("g")
+        .style("font", "7px Roboto")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+  svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Amount of Precipitation");
+
+  svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+
+  var focus = svg.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+
+  focus.append("circle")
+            .attr("r", 5);
+
+  focus.append("rect")
+            .attr("class", "tooltip")
+            .attr("width", 140)
+            .attr("height", 50)
+            .attr("x", 10)
+            .attr("y", -22)
+            .attr("rx", 4)
+            .attr("ry", 4);
+
+  focus.append("text")
+            .attr("class", "tooltip-date")
+            .attr("x", 18)
+            .attr("y", -2);
+
+  focus.append("text")
+            .attr("x", 18)
+            .attr("y", 18)
+            .text("cm: ");
+
+  focus.append("text")
+            .attr("class", "tooltip-precip")
+            .attr("x", 60)
+            .attr("y", 18);
+
+  svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { focus.style("display", null); })
+            .on("mouseout", function() { focus.style("display", "none"); })
+            .on("mousemove", mousemove);
+
+  function mousemove() {
+            var x0 = x.invert(d3.mouse(this)[0]),
+                i = bisectDate(data, x0, 1),
+                d0 = data[i - 1],
+                d1 = data[i],
+                d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+            focus.attr("transform", "translate(" + x(d.date) + "," + y(d.precip) + ")");
+            focus.select(".tooltip-date").text(dateFormatter(d.date));
+            focus.select(".tooltip-precip").text(formatValue(d.precip));
+        }
+    });
+
+
+//PIECHART
+var w = 600;
+var h = 600;
+
+var dataset = [11113.14, 65610];
+
+var outerRadius = w / 2;
+var innerRadius = 200;
+var arc = d3.svg.arc()
+    .innerRadius(innerRadius)
+    .outerRadius(outerRadius);
+
+var pie = d3.layout.pie();
+
+var color = d3.scaleOrdinal(['#d4af37','#696969']);
+
+
+// Create SVG element
+var svg2 = d3.select("#piechart")
+    .append("svg")
+    .attr("width", w)
+    .attr("height", h);
+
+// Set up groups
+var arcs = svg2.selectAll("g.arc")
+    .data(pie(dataset))
+    .enter()
+    .append("g")
+    .attr("class", "arc")
+    .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")")
+    .on("mouseover", function (d) {
+    d3.select("#tool_tip")
+        .style("left", d3.event.pageX + "px")
+        .style("top", d3.event.pageY + "px")
+        .style("opacity", 1)
+        .select("#value")
+        .text(d.value);
+})
+    .on("mouseout", function () {
+    // Hide the tooltip
+    d3.select("#tool_tip")
+        .style("opacity", 0);;
+});
+
+// Draw arc paths
+arcs.append("path")
+    .attr("fill", function (d, i) {
+    return color(i);
+})
+    .attr("d", arc);
+
+// Labels
+arcs.append("text")
+    .attr("transform", function (d) {
+    return "translate(" + arc.centroid(d) + ")";
+})
+    .attr("text-anchor", "middle")
+    .text(function (d) {
+    return d.value;
+});
+
+
+// Initializing map location
+var map = L.map('map').setView([	7.0047, 	79.9542], 11);
+
+
+// Loading base tile layer
+var Esri_WorldStreetMap = L.tileLayer('https://api.mapbox.com/styles/v1/lisjak/ck2wv0tow213y1cmqllogznl9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibGlzamFrIiwiYSI6ImNqdDRqZTV2eTAyNHEzem8waDBucDh6eTgifQ.puDAiHHRyVRbAFgyz2SJ2w', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+}).addTo(map);
+
+// Hospital location (GeoJSON)
+var hospitalIcon = L.icon({
+    iconUrl: './public/hospital-symbol.png',
+    iconSize: [12, 12],
+    iconAnchor: [12, 12],
+    popupAnchor: [12, 12]
+});
+
+var geojsonLayerHospitals = new L.GeoJSON.AJAX("./public/sri-lanka_hospitals_osm.geojson",{
+  middleware:function(data){
+    return L.geoJson(data, {
+      onEachFeature: function (feature, layer) {
+          layer.setIcon(hospitalIcon);
+          layer.bindTooltip("Hospital Name: " + layer.feature.properties.name).openTooltip();
+      }
+    }).addTo(map);
+  }
+});
+
+
+
+
+// Instantiate KMZ parser (async)
+  var kmzParser = new L.KMZParser({
+    onKMZLoaded: function(layer, name) {
+      control.addOverlay(layer, name);
+      layer.addTo(map);
+    }
+  });
+
+// Add remote KMZ files as layers 
+  kmzParser.load('./public/Flood.kmz');
+
+  var control = L.control.layers(null, null, { collapsed:false }).addTo(map);
+
+
+// ========== KMZ PARSER ============
+/*!
+	Copyright (c) 2011-2015, Pavel Shramov, Bruno Bergot - MIT licence
+*/
+
+L.KML = L.FeatureGroup.extend({
+
+	initialize: function (kml) {
+		this._kml = kml;
+		this._layers = {};
+
+		if (kml) {
+			this.addKML(kml);
+		}
+	},
+
+	addKML: function (xml) {
+		var layers = L.KML.parseKML(xml);
+		if (!layers || !layers.length) return;
+		for (var i = 0; i < layers.length; i++) {
+			this.fire('addlayer', {
+				layer: layers[i]
+			});
+			this.addLayer(layers[i]);
+		}
+		this.latLngs = L.KML.getLatLngs(xml);
+		this.fire('loaded');
+	},
+
+	latLngs: []
+});
+
+L.Util.extend(L.KML, {
+
+	parseKML: function (xml) {
+		var style = this.parseStyles(xml);
+		this.parseStyleMap(xml, style);
+		var el = xml.getElementsByTagName('Folder');
+		var layers = [], l;
+		for (var i = 0; i < el.length; i++) {
+			if (!this._check_folder(el[i])) { continue; }
+			l = this.parseFolder(el[i], style);
+			if (l) { layers.push(l); }
+		}
+		el = xml.getElementsByTagName('Placemark');
+		for (var j = 0; j < el.length; j++) {
+			if (!this._check_folder(el[j])) { continue; }
+			l = this.parsePlacemark(el[j], xml, style);
+			if (l) { layers.push(l); }
+		}
+		el = xml.getElementsByTagName('GroundOverlay');
+		for (var k = 0; k < el.length; k++) {
+			l = this.parseGroundOverlay(el[k]);
+			if (l) { layers.push(l); }
+		}
+		return layers;
+	},
+
+	// Return false if e's first parent Folder is not [folder]
+	// - returns true if no parent Folders
+	_check_folder: function (e, folder) {
+		e = e.parentNode;
+		while (e && e.tagName !== 'Folder')
+		{
+			e = e.parentNode;
+		}
+		return !e || e === folder;
+	},
+
+	parseStyles: function (xml) {
+		var styles = {};
+		var sl = xml.getElementsByTagName('Style');
+		for (var i=0, len=sl.length; i<len; i++) {
+			var style = this.parseStyle(sl[i]);
+			if (style) {
+				var styleName = '#' + style.id;
+				styles[styleName] = style;
+			}
+		}
+		return styles;
+	},
+
+	parseStyle: function (xml) {
+		var style = {}, poptions = {}, ioptions = {}, el, id;
+
+		var attributes = {color: true, width: true, Icon: true, href: true, hotSpot: true};
+
+		function _parse (xml) {
+			var options = {};
+			for (var i = 0; i < xml.childNodes.length; i++) {
+				var e = xml.childNodes[i];
+				var key = e.tagName;
+				if (!attributes[key]) { continue; }
+				if (key === 'hotSpot')
+				{
+					for (var j = 0; j < e.attributes.length; j++) {
+						options[e.attributes[j].name] = e.attributes[j].nodeValue;
+					}
+				} else {
+					var value = e.childNodes[0].nodeValue;
+					if (key === 'color') {
+						options.opacity = parseInt(value.substring(0, 2), 16) / 255.0;
+						options.color = '#' + value.substring(6, 8) + value.substring(4, 6) + value.substring(2, 4);
+					} else if (key === 'width') {
+						options.weight = value;
+					} else if (key === 'Icon') {
+						ioptions = _parse(e);
+						if (ioptions.href) { options.href = ioptions.href; }
+					} else if (key === 'href') {
+						options.href = value;
+					}
+				}
+			}
+			return options;
+		}
+
+		el = xml.getElementsByTagName('LineStyle');
+		if (el && el[0]) { style = _parse(el[0]); }
+		el = xml.getElementsByTagName('PolyStyle');
+		if (el && el[0]) { poptions = _parse(el[0]); }
+		if (poptions.color) { style.fillColor = poptions.color; }
+		if (poptions.opacity) { style.fillOpacity = poptions.opacity; }
+		el = xml.getElementsByTagName('IconStyle');
+		if (el && el[0]) { ioptions = _parse(el[0]); }
+		if (ioptions.href) {
+			style.icon = new L.KMLIcon({
+				iconUrl: ioptions.href,
+				shadowUrl: null,
+				anchorRef: {x: ioptions.x, y: ioptions.y},
+				anchorType:	{x: ioptions.xunits, y: ioptions.yunits}
+			});
+		}
+
+		id = xml.getAttribute('id');
+		if (id && style) {
+			style.id = id;
+		}
+
+		return style;
+	},
+
+	parseStyleMap: function (xml, existingStyles) {
+		var sl = xml.getElementsByTagName('StyleMap');
+
+		for (var i = 0; i < sl.length; i++) {
+			var e = sl[i], el;
+			var smKey, smStyleUrl;
+
+			el = e.getElementsByTagName('key');
+			if (el && el[0]) { smKey = el[0].textContent; }
+			el = e.getElementsByTagName('styleUrl');
+			if (el && el[0]) { smStyleUrl = el[0].textContent; }
+
+			if (smKey === 'normal')
+			{
+				existingStyles['#' + e.getAttribute('id')] = existingStyles[smStyleUrl];
+			}
+		}
+
+		return;
+	},
+
+	parseFolder: function (xml, style) {
+		var el, layers = [], l;
+		el = xml.getElementsByTagName('Folder');
+		for (var i = 0; i < el.length; i++) {
+			if (!this._check_folder(el[i], xml)) { continue; }
+			l = this.parseFolder(el[i], style);
+			if (l) { layers.push(l); }
+		}
+		el = xml.getElementsByTagName('Placemark');
+		for (var j = 0; j < el.length; j++) {
+			if (!this._check_folder(el[j], xml)) { continue; }
+			l = this.parsePlacemark(el[j], xml, style);
+			if (l) { layers.push(l); }
+		}
+		el = xml.getElementsByTagName('GroundOverlay');
+		for (var k = 0; k < el.length; k++) {
+			if (!this._check_folder(el[k], xml)) { continue; }
+			l = this.parseGroundOverlay(el[k]);
+			if (l) { layers.push(l); }
+		}
+		if (!layers.length) { return; }
+		if (layers.length === 1) { return layers[0]; }
+		return new L.FeatureGroup(layers);
+	},
+
+	parsePlacemark: function (place, xml, style, options) {
+		var h, i, j, k, el, il, opts = options || {};
+
+		el = place.getElementsByTagName('styleUrl');
+		for (i = 0; i < el.length; i++) {
+			var url = el[i].childNodes[0].nodeValue;
+			for (var a in style[url]) {
+				opts[a] = style[url][a];
+			}
+		}
+
+		il = place.getElementsByTagName('Style')[0];
+		if (il) {
+			var inlineStyle = this.parseStyle(place);
+			if (inlineStyle) {
+				for (k in inlineStyle) {
+					opts[k] = inlineStyle[k];
+				}
+			}
+		}
+
+		var multi = ['MultiGeometry', 'MultiTrack', 'gx:MultiTrack'];
+		for (h in multi) {
+			el = place.getElementsByTagName(multi[h]);
+			for (i = 0; i < el.length; i++) {
+				return this.parsePlacemark(el[i], xml, style, opts);
+			}
+		}
+
+		var layers = [];
+
+		var parse = ['LineString', 'Polygon', 'Point', 'Track', 'gx:Track'];
+		for (j in parse) {
+			var tag = parse[j];
+			el = place.getElementsByTagName(tag);
+			for (i = 0; i < el.length; i++) {
+				var l = this['parse' + tag.replace(/gx:/, '')](el[i], xml, opts);
+				if (l) { layers.push(l); }
+			}
+		}
+
+		if (!layers.length) {
+			return;
+		}
+		var layer = layers[0];
+		if (layers.length > 1) {
+			layer = new L.FeatureGroup(layers);
+		}
+
+		var name, descr = '';
+		el = place.getElementsByTagName('name');
+		if (el.length && el[0].childNodes.length) {
+			name = el[0].childNodes[0].nodeValue;
+		}
+		el = place.getElementsByTagName('description');
+		for (i = 0; i < el.length; i++) {
+			for (j = 0; j < el[i].childNodes.length; j++) {
+				descr = descr + el[i].childNodes[j].nodeValue;
+			}
+		}
+
+		if (name) {
+			layer.on('add', function () {
+				layer.bindPopup('<h2>' + name + '</h2>' + descr, { className: 'kml-popup'});
+			});
+		}
+
+		return layer;
+	},
+
+	parseCoords: function (xml) {
+		var el = xml.getElementsByTagName('coordinates');
+		return this._read_coords(el[0]);
+	},
+
+	parseLineString: function (line, xml, options) {
+		var coords = this.parseCoords(line);
+		if (!coords.length) { return; }
+		return new L.Polyline(coords, options);
+	},
+
+	parseTrack: function (line, xml, options) {
+		var el = xml.getElementsByTagName('gx:coord');
+		if (el.length === 0) { el = xml.getElementsByTagName('coord'); }
+		var coords = [];
+		for (var j = 0; j < el.length; j++) {
+			coords = coords.concat(this._read_gxcoords(el[j]));
+		}
+		if (!coords.length) { return; }
+		return new L.Polyline(coords, options);
+	},
+
+	parsePoint: function (line, xml, options) {
+		var el = line.getElementsByTagName('coordinates');
+		if (!el.length) {
+			return;
+		}
+		var ll = el[0].childNodes[0].nodeValue.split(',');
+		return new L.KMLMarker(new L.LatLng(ll[1], ll[0]), options);
+	},
+
+	parsePolygon: function (line, xml, options) {
+		var el, polys = [], inner = [], i, coords;
+		el = line.getElementsByTagName('outerBoundaryIs');
+		for (i = 0; i < el.length; i++) {
+			coords = this.parseCoords(el[i]);
+			if (coords) {
+				polys.push(coords);
+			}
+		}
+		el = line.getElementsByTagName('innerBoundaryIs');
+		for (i = 0; i < el.length; i++) {
+			coords = this.parseCoords(el[i]);
+			if (coords) {
+				inner.push(coords);
+			}
+		}
+		if (!polys.length) {
+			return;
+		}
+		if (options.fillColor) {
+			options.fill = true;
+		}
+		if (polys.length === 1) {
+			return new L.Polygon(polys.concat(inner), options);
+		}
+		return new L.MultiPolygon(polys, options);
+	},
+
+	getLatLngs: function (xml) {
+		var el = xml.getElementsByTagName('coordinates');
+		var coords = [];
+		for (var j = 0; j < el.length; j++) {
+			// text might span many childNodes
+			coords = coords.concat(this._read_coords(el[j]));
+		}
+		return coords;
+	},
+
+	_read_coords: function (el) {
+		var text = '', coords = [], i;
+		for (i = 0; i < el.childNodes.length; i++) {
+			text = text + el.childNodes[i].nodeValue;
+		}
+		text = text.split(/[\s\n]+/);
+		for (i = 0; i < text.length; i++) {
+			var ll = text[i].split(',');
+			if (ll.length < 2) {
+				continue;
+			}
+			coords.push(new L.LatLng(ll[1], ll[0]));
+		}
+		return coords;
+	},
+
+	_read_gxcoords: function (el) {
+		var text = '', coords = [];
+		text = el.firstChild.nodeValue.split(' ');
+		coords.push(new L.LatLng(text[1], text[0]));
+		return coords;
+	},
+
+	parseGroundOverlay: function (xml) {
+		var latlonbox = xml.getElementsByTagName('LatLonBox')[0];
+		var bounds = new L.LatLngBounds(
+			[
+				latlonbox.getElementsByTagName('south')[0].childNodes[0].nodeValue,
+				latlonbox.getElementsByTagName('west')[0].childNodes[0].nodeValue
+			],
+			[
+				latlonbox.getElementsByTagName('north')[0].childNodes[0].nodeValue,
+				latlonbox.getElementsByTagName('east')[0].childNodes[0].nodeValue
+			]
+		);
+		var attributes = {Icon: true, href: true, color: true};
+		function _parse (xml) {
+			var options = {}, ioptions = {};
+			for (var i = 0; i < xml.childNodes.length; i++) {
+				var e = xml.childNodes[i];
+				var key = e.tagName;
+				if (!attributes[key]) { continue; }
+				var value = e.childNodes[0].nodeValue;
+				if (key === 'Icon') {
+					ioptions = _parse(e);
+					if (ioptions.href) { options.href = ioptions.href; }
+				} else if (key === 'href') {
+					options.href = value;
+				} else if (key === 'color') {
+					options.opacity = parseInt(value.substring(0, 2), 16) / 255.0;
+					options.color = '#' + value.substring(6, 8) + value.substring(4, 6) + value.substring(2, 4);
+				}
+			}
+			return options;
+		}
+		var options = {};
+		options = _parse(xml);
+		if (latlonbox.getElementsByTagName('rotation')[0] !== undefined) {
+			var rotation = latlonbox.getElementsByTagName('rotation')[0].childNodes[0].nodeValue;
+			options.rotation = parseFloat(rotation);
+		}
+		return new L.RotatedImageOverlay(options.href, bounds, {opacity: options.opacity, angle: options.rotation});
+	}
+
+});
+
+L.KMLIcon = L.Icon.extend({
+	options: {
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+	},
+	_setIconStyles: function (img, name) {
+		L.Icon.prototype._setIconStyles.apply(this, [img, name]);
+		if( img.complete ) {
+			this.applyCustomStyles( img )
+		} else {
+			img.onload = this.applyCustomStyles.bind(this,img)
+		}
+
+	},
+	applyCustomStyles: function(img) {
+		var options = this.options;
+		this.options.popupAnchor = [0,(-0.83*img.height)];
+		if (options.anchorType.x === 'fraction')
+			img.style.marginLeft = (-options.anchorRef.x * img.width) + 'px';
+		if (options.anchorType.y === 'fraction')
+			img.style.marginTop  = ((-(1 - options.anchorRef.y) * img.height) + 1) + 'px';
+		if (options.anchorType.x === 'pixels')
+			img.style.marginLeft = (-options.anchorRef.x) + 'px';
+		if (options.anchorType.y === 'pixels')
+			img.style.marginTop  = (options.anchorRef.y - img.height + 1) + 'px';
+	}
+});
+
+
+L.KMLMarker = L.Marker.extend({
+	options: {
+		icon: new L.KMLIcon.Default()
+	}
+});
+
+// Inspired by https://github.com/bbecquet/Leaflet.PolylineDecorator/tree/master/src
+L.RotatedImageOverlay = L.ImageOverlay.extend({
+	options: {
+		angle: 0
+	},
+	_reset: function () {
+		L.ImageOverlay.prototype._reset.call(this);
+		this._rotate();
+	},
+	_animateZoom: function (e) {
+		L.ImageOverlay.prototype._animateZoom.call(this, e);
+		this._rotate();
+	},
+	_rotate: function () {
+        if (L.DomUtil.TRANSFORM) {
+            // use the CSS transform rule if available
+            this._image.style[L.DomUtil.TRANSFORM] += ' rotate(' + this.options.angle + 'deg)';
+        } else if (L.Browser.ie) {
+            // fallback for IE6, IE7, IE8
+            var rad = this.options.angle * (Math.PI / 180),
+                costheta = Math.cos(rad),
+                sintheta = Math.sin(rad);
+            this._image.style.filter += ' progid:DXImageTransform.Microsoft.Matrix(sizingMethod=\'auto expand\', M11=' +
+                costheta + ', M12=' + (-sintheta) + ', M21=' + sintheta + ', M22=' + costheta + ')';
+        }
+	},
+	getBounds: function () {
+		return this._bounds;
+	}
+});
+
+// ========== KMZ PARSER ============
+
+
+</script>
+</body>
+</html>
