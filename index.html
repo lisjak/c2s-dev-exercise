@@ -169,7 +169,7 @@ btn2.onclick = function () {
 
 //Precipitation D3 Line graph
 var margin = { top: 30, right: 120, bottom: 30, left: 50 },
-  width = 1000 - margin.left - margin.right,
+  width = 600 - margin.left - margin.right,
   height = 800 - margin.top - margin.bottom,
   tooltip = { width: 100, height: 100, x: 10, y: -30 };
 
@@ -199,7 +199,11 @@ var line = d3.svg.line()
   .y(function(d) { return y(d.precip); });
 
 var svg = d3.select("#graph").append("svg")
-    .attr("viewBox", `0 0 1000 1000`);
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
         
 
 d3.csv("./public/Sri-Lanka_GSMaP_20180516_20180612.csv", function(error, data) {
@@ -218,7 +222,7 @@ d3.csv("./public/Sri-Lanka_GSMaP_20180516_20180612.csv", function(error, data) {
   y.domain(d3.extent(data, function(d) { return d.precip; }));
 
   svg.append("g")
-        .style("font", "7px Roboto")
+        .style("font", "7px 'Roboto'")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);

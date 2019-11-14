@@ -204,11 +204,13 @@ h3 {
     background-color: darkgrey;
     border: 10px solid gold;
     margin-top: 5%;
+    width: 100vw;
     max-height: 140vh;
 }
 
 #graph svg {
-    padding: 2%;
+    padding: 0%;
+    width: 100vw;
 }
 
 #graphbox {
