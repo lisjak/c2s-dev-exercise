@@ -204,7 +204,7 @@ h3 {
     background-color: darkgrey;
     border: 10px solid gold;
     margin-top: 5%;
-    max-height: 140vh;
+    max-height: 180vh;
 }
 
 #graph svg {
